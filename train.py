@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import argparse
-import numpy as np
-import random
 
 from resnet18 import ResNet, BasicBlock
 from resnet18_torchvision import build_model
@@ -28,11 +26,9 @@ torch.manual_seed(seed)
 torch.cuda.manual_seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = True
-np.random.seed(seed)
-random.seed(seed)
 
 # Learning and training parameters.
-epochs = 20
+epochs = 1
 batch_size = 64
 learning_rate = 0.01
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -77,8 +73,6 @@ if __name__ == '__main__':
             device,
             epoch
         )
-        if args.profiling:
-            break
         valid_epoch_loss, valid_epoch_acc = validate(
             model, 
             valid_loader, 

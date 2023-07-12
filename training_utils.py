@@ -1,17 +1,14 @@
 import torch
 
-from tqdm import tqdm
-import wecloud_callback
-
 # Training function.
-def train(model, trainloader, optimizer, criterion, device, epoch, profiling, log_interval=10):
+def train(model, trainloader, optimizer, criterion, device, epoch, log_interval=10):
     model.train()
-    # print('Training')
+    print('Training')
     train_running_loss = 0.0
     train_running_correct = 0
     counter = 0
-    for batch_idx, data in tqdm(enumerate(trainloader), total=len(trainloader)):
-        wecloud_callback.step_begin()
+    for batch_idx, data in enumerate(trainloader):
+        # wecloud_callback.step_begin()
         counter += 1
         image, labels = data
         image = image.to(device)
@@ -29,13 +26,12 @@ def train(model, trainloader, optimizer, criterion, device, epoch, profiling, lo
         loss.backward()
         # Update the weights.
         optimizer.step()
-        if batch_idx % log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
-            if profiling:
-                return
-        wecloud_callback.step_end()
+        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            epoch, batch_idx * len(data), len(trainloader.dataset),
+            100. * batch_idx / len(trainloader), loss.item()))
+        # wecloud_callback.step_end()
+        if batch_idx == 10:
+            break
     
     # Loss and accuracy for the complete epoch.
     epoch_loss = train_running_loss / counter

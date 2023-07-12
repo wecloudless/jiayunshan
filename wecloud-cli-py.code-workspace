@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../../wecloud-cli-py"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}
