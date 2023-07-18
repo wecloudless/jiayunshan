@@ -48,7 +48,7 @@ def validate(model, testloader, criterion, device):
     counter = 0
 
     with torch.no_grad():
-        for i, data in tqdm(enumerate(testloader), total=len(testloader)):
+        for i, data in enumerate(testloader):
             counter += 1
             
             image, labels = data

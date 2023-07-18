@@ -18,6 +18,9 @@ parser.add_argument(
     '--profiling', action="store_true", 
     default=False, help="profile one batch"
 )
+parser.add_argument(
+    '--epoch', default=10
+)
 args = vars(parser.parse_args())
 
 # Set seed.
@@ -28,7 +31,7 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = True
 
 # Learning and training parameters.
-epochs = 1
+epochs = int(args['epoch'])
 batch_size = 64
 learning_rate = 0.01
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
