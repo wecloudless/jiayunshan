@@ -1,3 +1,6 @@
+import time
+t0 = time.time()
+accumulated_training_time = 0
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -66,15 +69,18 @@ if __name__ == '__main__':
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
     # Start the training.
+    t1 = time.time()
+    print("[profiling] init time: {}s".format(t1-t0))
     for epoch in range(epochs):
         # print(f"[INFO]: Epoch {epoch+1} of {epochs}")
-        train_epoch_loss, train_epoch_acc = train(
+        train_epoch_loss, train_epoch_acc, accumulated_training_time = train(
             model, 
             train_loader, 
             optimizer, 
             criterion,
             device,
-            epoch
+            epoch,
+            accumulated_training_time
         )
         valid_epoch_loss, valid_epoch_acc = validate(
             model, 

@@ -1,13 +1,16 @@
 import torch
+import time
+#from train import accumulated_training_time
 
 # Training function.
-def train(model, trainloader, optimizer, criterion, device, epoch, log_interval=10):
+def train(model, trainloader, optimizer, criterion, device, epoch, accumulated_training_time=0, log_interval=10):
     model.train()
     print('Training')
     train_running_loss = 0.0
     train_running_correct = 0
     counter = 0
     for batch_idx, data in enumerate(trainloader):
+        t0 = time.time()
         # wecloud_callback.step_begin()
         counter += 1
         image, labels = data
@@ -30,6 +33,9 @@ def train(model, trainloader, optimizer, criterion, device, epoch, log_interval=
             epoch, batch_idx * len(data), len(trainloader.dataset),
             100. * batch_idx / len(trainloader), loss.item()))
         # wecloud_callback.step_end()
+        t1 = time.time()
+        accumulated_training_time += (t1 - t0)
+        print("[profiling] step time: {}s, accumuated training time: {}s".format(t1 - t0, accumulated_training_time))
         if batch_idx == 10:
             break
     
@@ -37,7 +43,7 @@ def train(model, trainloader, optimizer, criterion, device, epoch, log_interval=
     epoch_loss = train_running_loss / counter
     # epoch_acc = 100. * (train_running_correct / len(trainloader.dataset))
     epoch_acc = 100. * (train_running_correct / len(trainloader.dataset))
-    return epoch_loss, epoch_acc
+    return epoch_loss, epoch_acc, accumulated_training_time
 
 # Validation function.
 def validate(model, testloader, criterion, device):
