@@ -1,4 +1,4 @@
-import time
+import time, os, re
 t0 = time.time()
 accumulated_training_time = 0
 import torch
@@ -33,6 +33,10 @@ torch.cuda.manual_seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = True
 
+CHECKPOINT_PATH = 'output/checkpoint'
+if not os.path.exists(CHECKPOINT_PATH):
+    os.makedirs(CHECKPOINT_PATH)
+
 # Learning and training parameters.
 epochs = int(args['epoch'])
 batch_size = 64
@@ -64,6 +68,31 @@ optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 # Loss function.
 criterion = nn.CrossEntropyLoss()
 
+def most_recent_weights(weights_folder):
+    """
+        return most recent created weights file
+        if folder is empty return empty string
+    """
+    weight_files = os.listdir(weights_folder)
+    if len(weight_files) == 0:
+        return 0
+
+    regex_str = r'(\d+)'
+
+    # sort files by epoch
+    weight_files = sorted(weight_files, key=lambda w: int(re.search(regex_str, w).groups()[0]))
+
+    return weight_files[-1]
+
+def last_epoch(weights_folder):
+    weight_file = most_recent_weights(weights_folder)
+    if not weight_file:
+       return 0
+       #raise Exception('no recent weights were found')
+    resume_epoch = int(weight_file.split('-')[0])+1
+
+    return resume_epoch
+
 if __name__ == '__main__':
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
@@ -71,7 +100,10 @@ if __name__ == '__main__':
     # Start the training.
     t1 = time.time()
     print("[profiling] init time: {}s".format(t1-t0))
-    for epoch in range(epochs):
+    
+    resume_epoch = last_epoch(os.path.join(CHECKPOINT_PATH))
+    
+    for epoch in range(resume_epoch, epochs):
         # print(f"[INFO]: Epoch {epoch+1} of {epochs}")
         train_epoch_loss, train_epoch_acc, accumulated_training_time = train(
             model, 
@@ -92,6 +124,11 @@ if __name__ == '__main__':
         valid_loss.append(valid_epoch_loss)
         train_acc.append(train_epoch_acc)
         valid_acc.append(valid_epoch_acc)
+        
+        checkpoint_dir = os.path.join(CHECKPOINT_PATH, '{epoch}')
+        os.mkdir(checkpoint_dir.format(epoch=epoch))
+        checkpoint_path = os.path.join(checkpoint_dir.format(epoch=epoch), 'checkpoint.pth')
+        torch.save(model.state_dict(), checkpoint_path)
         # print(f"Training loss: {train_epoch_loss:.3f}, training acc: {train_epoch_acc:.3f}")
         # print(f"Validation loss: {valid_epoch_loss:.3f}, validation acc: {valid_epoch_acc:.3f}")
         # print('-'*50)
