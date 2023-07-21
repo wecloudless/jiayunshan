@@ -126,7 +126,8 @@ if __name__ == '__main__':
         valid_acc.append(valid_epoch_acc)
         
         checkpoint_dir = os.path.join(CHECKPOINT_PATH, '{epoch}')
-        os.mkdir(checkpoint_dir.format(epoch=epoch))
+        if not os.path.exists(checkpoint_dir.format(epoch=epoch)):
+            os.mkdir(checkpoint_dir.format(epoch=epoch))
         checkpoint_path = os.path.join(checkpoint_dir.format(epoch=epoch), 'checkpoint.pth')
         torch.save(model.state_dict(), checkpoint_path)
         # print(f"Training loss: {train_epoch_loss:.3f}, training acc: {train_epoch_acc:.3f}")
